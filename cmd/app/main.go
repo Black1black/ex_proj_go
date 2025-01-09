@@ -7,7 +7,7 @@ import (
 	"ex_proj_go/pkg/logger"
 	"log"
 
-	_ "ex_proj_go/docs"
+	//_ "ex_proj_go/docs"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
