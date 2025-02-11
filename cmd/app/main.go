@@ -3,7 +3,7 @@ package main
 import (
 	config "ex_proj_go/configs"
 	"ex_proj_go/internal/db"
-
+	"ex_proj_go/internal/repository"
 	"log"
 )
 
@@ -27,5 +27,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Ошибка подключения к БД: %v", err)
 	}
+	repos := repository.NewRepository(postgresDB)
 
 }

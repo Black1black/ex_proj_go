@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/cridenour/go-postgis"
+	"github.com/ybru-tech/georm"
 	"gorm.io/gorm"
 )
 
@@ -49,9 +49,9 @@ func (u *User) validate() error {
 }
 
 type UsersLocation struct {
-	UserID   int64             `gorm:"primaryKey;type:bigint;not null"`
-	User     User              `gorm:"foreignKey:UserID;references:ID"`
-	Location postgis.PointSrid `gorm:"type:geography(POINT,4326)"`
+	UserID   int64       `gorm:"column:user_id;primaryKey;type:bigint;not null"`
+	User     User        `gorm:"foreignKey:UserID;references:ID"`
+	Location georm.Point `gorm:"type:geometry(POINT,4326)"`
 }
 
 func (UsersLocation) TableName() string {
