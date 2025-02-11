@@ -4,6 +4,7 @@ import (
 	config "ex_proj_go/configs"
 	"ex_proj_go/internal/db"
 	"ex_proj_go/internal/repository"
+	"ex_proj_go/internal/service"
 	"log"
 )
 
@@ -28,5 +29,6 @@ func main() {
 		log.Fatalf("Ошибка подключения к БД: %v", err)
 	}
 	repos := repository.NewRepository(postgresDB)
+	services := service.NewService(repos)
 
 }
