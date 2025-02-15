@@ -1,23 +1,13 @@
 package service
 
-import (
-	"ex_proj_go/internal/repository"
-)
-
-type Authorization interface {
-}
-
-type Users interface {
-}
-
 type Service struct {
-	Authorization
-	Users
+	usersRepo Users
+	authRepo  Authorization
 }
 
-func NewService(repos *repository.Repository) *Service {
+func NewService(usersRepo Users, authRepo Authorization) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos.Authorization),
-		Users:         NewUsersService(repos.Users),
+		usersRepo: usersRepo,
+		authRepo:  authRepo,
 	}
 }

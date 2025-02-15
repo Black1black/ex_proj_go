@@ -3,8 +3,11 @@ package main
 import (
 	config "ex_proj_go/configs"
 	"ex_proj_go/internal/db"
-	"ex_proj_go/internal/repository"
+	"ex_proj_go/internal/handler"
+	"ex_proj_go/internal/repository/auth"
+	"ex_proj_go/internal/repository/users"
 	"ex_proj_go/internal/service"
+
 	"log"
 )
 
@@ -28,7 +31,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Ошибка подключения к БД: %v", err)
 	}
-	repos := repository.NewRepository(postgresDB)
-	services := service.NewService(repos)
+	usersRepo := users.NewRepository(postgresDB)
+	authRepo := auth.NewRepository(postgresDB)
+
+	services := service.NewService(usersRepo, authRepo)
+	handler := handler.NewHandler(services)
 
 }
