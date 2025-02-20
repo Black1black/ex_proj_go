@@ -5,8 +5,11 @@ import (
 	"ex_proj_go/internal/db"
 	"ex_proj_go/internal/handler"
 	"ex_proj_go/internal/repository/auth"
+	"ex_proj_go/internal/repository/dao"
+
 	"ex_proj_go/internal/repository/users"
-	"ex_proj_go/internal/service"
+	authUC "ex_proj_go/internal/usecase/auth"
+	usersUC "ex_proj_go/internal/usecase/users"
 
 	"log"
 )
@@ -33,8 +36,11 @@ func main() {
 	}
 	usersRepo := users.NewRepository(postgresDB)
 	authRepo := auth.NewRepository(postgresDB)
+	daoRepo := dao.NewBaseDAO(postgresDB)
 
-	services := service.NewService(usersRepo, authRepo)
-	handler := handler.NewHandler(services)
+	authUseCase := authUC.NewUsecase(authRepo, daoRepo)
+	usersUseCase := usersUC.NewUsecase(usersRepo, daoRepo)
+
+	handler := handler.NewHandler(usersUseCase, authUseCase)
 
 }

@@ -11,6 +11,8 @@ const (
 	authorizationHeader = "Authorization"
 	authorizationCookie = "ttt"
 	userCtx             = "userId"
+	tokenCtx            = "token"
+	userModelCtx        = "userModel"
 )
 
 func (h *Handler) getUserToken(c *gin.Context) {
@@ -35,16 +37,21 @@ func (h *Handler) getUserToken(c *gin.Context) {
 		}
 	}
 
-	c.Set(userCtx, token)
+	c.Set(tokenCtx, token)
 }
-func getUserId(c *gin.Context) (int, error) {
-	token, ok := c.Get(userCtx)
+func getUserId(c *gin.Context) {
+	rawToken, ok := c.Get(tokenCtx)
+	if !ok {
+		return
+	}
+	token, ok := rawToken.(string)
+	if !ok {
+		return
+	}
+	userId, err := authTools.ParseToken(token)
+	if err != nil {
+		return
+	}
+	c.Set(userCtx, userId)
 
-	return 0, nil
-}
-
-func getUserModel(c *gin.Context) (int, error) {
-	token, ok := c.Get(userCtx)
-
-	return 0, nil
 }
