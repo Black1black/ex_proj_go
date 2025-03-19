@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"ex_proj_go/internal/entity"
 	"ex_proj_go/pkg/auth"
 	"net/http"
 
@@ -46,27 +47,63 @@ func (h *Handler) login(c *gin.Context) {
 	if err != nil {
 		return
 	}
+	c.SetCookie(authorizationCookie, accessToken, 3600*12, "", "", false, true)
+	c.SetCookie(authorizationRefreshCookie, refreshToken, 3600*12, "", "", false, true)
+	// имя: , значение: , срок жизни: , путь: , домен: "", secure: , HttpOnly:
+
 	c.JSON(http.StatusOK, auth.Token{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	})
 }
 
-type signInInput struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
-func (h *Handler) signIn(c *gin.Context) {
-	var input signInInput
-
-	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
-	}
-	token, err := h.services.Authorization.GenerateToken(input.Username, input.Password)
-	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+func (h *Handler) refresh(c *gin.Context) {
+	rawUserModel, ok := c.Get(userModelCtx) // c.Get возвращает any
+	if !ok {
 		return
 	}
-	c.JSON(http.StatusOK, map[string]interface{}{"token": token})
+	userModel, ok := rawUserModel.(*entity.User)
+	if !ok {
+		return
+	}
+	refreshToken, err := authTools.GenerateToken(userModel.ID, "refresh")
+	if err != nil {
+		return
+	}
+
+	accessToken, err := authTools.GenerateToken(userModel.ID, "access")
+	if err != nil {
+		return
+	}
+	err = h.authUC.Login(userModel.ID, refreshToken)
+	if err != nil {
+		return
+	}
+	c.SetCookie(authorizationCookie, accessToken, 3600*12, "", "", false, true)
+	c.SetCookie(authorizationRefreshCookie, refreshToken, 3600*12, "", "", false, true)
+	// имя: , значение: , срок жизни: , путь: , домен: "", secure: , HttpOnly:
+
+	c.JSON(http.StatusOK, auth.Token{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	})
 }
+
+// type signInInput struct {
+// 	Username string `json:"username" binding:"required"`
+// 	Password string `json:"password" binding:"required"`
+// }
+
+// func (h *Handler) signIn(c *gin.Context) {
+// 	var input signInInput
+
+// 	if err := c.BindJSON(&input); err != nil {
+// 		newErrorResponse(c, http.StatusBadRequest, err.Error())
+// 	}
+// 	token, err := h.services.Authorization.GenerateToken(input.Username, input.Password)
+// 	if err != nil {
+// 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, map[string]interface{}{"token": token})
+// }

@@ -5,7 +5,6 @@ import (
 	"ex_proj_go/internal/db"
 	"ex_proj_go/internal/handler"
 	"ex_proj_go/internal/repository/auth"
-	"ex_proj_go/internal/repository/dao"
 
 	"ex_proj_go/internal/repository/users"
 	authUC "ex_proj_go/internal/usecase/auth"
@@ -34,12 +33,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Ошибка подключения к БД: %v", err)
 	}
-	usersRepo := users.NewRepository(postgresDB)
 	authRepo := auth.NewRepository(postgresDB)
-	daoRepo := dao.NewBaseDAO(postgresDB)
+	usersRepo := users.NewRepository(postgresDB)
 
-	authUseCase := authUC.NewUsecase(authRepo, daoRepo)
-	usersUseCase := usersUC.NewUsecase(usersRepo, daoRepo)
+	authUseCase := authUC.NewUsecase(authRepo)
+	usersUseCase := usersUC.NewUsecase(usersRepo)
 
 	handler := handler.NewHandler(usersUseCase, authUseCase)
 

@@ -14,7 +14,7 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
-func (r *Repository) AddToken(userId int, token string) error {
+func (r *Repository) AddToken(userId int64, token string) error {
 	authToken := models.AuthToken{
 		UserID: int64(userId),
 		Token:  token,

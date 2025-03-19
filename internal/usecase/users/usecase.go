@@ -2,32 +2,22 @@ package users
 
 import (
 	"ex_proj_go/internal/entity"
-	"ex_proj_go/internal/models"
-	"ex_proj_go/internal/usecase"
-	"fmt"
 )
 
 type Usecase struct {
 	usersRepo Users
-	daoRepo   usecase.DAO
 }
 
-func NewUsecase(usersRepo Users, daoRepo usecase.DAO) *Usecase {
+func NewUsecase(usersRepo Users) *Usecase {
 	return &Usecase{
 		usersRepo: usersRepo,
-		daoRepo:   daoRepo,
 	}
 }
 
 func (u *Usecase) GetByID(id int64) (*entity.User, error) {
-	user := models.User{}
-	model, err := u.daoRepo.FindOneOrNone(user, map[string]interface{}{"id": id})
+	modelUser, err := u.usersRepo.GetByID(id)
 	if err != nil {
 		return nil, err
-	}
-	modelUser, ok := model.(models.User)
-	if !ok {
-		return nil, fmt.Errorf("Failed convert to model")
 	}
 
 	return &entity.User{

@@ -1,16 +1,12 @@
 package auth
 
-import "ex_proj_go/internal/usecase"
-
 type Usecase struct {
 	authRepo Authorization
-	daoRepo  usecase.DAO
 }
 
-func NewUsecase(authRepo Authorization, daoRepo usecase.DAO) *Usecase {
+func NewUsecase(authRepo Authorization) *Usecase {
 	return &Usecase{
 		authRepo: authRepo,
-		daoRepo:  daoRepo,
 	}
 }
 
