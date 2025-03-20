@@ -9,6 +9,7 @@ type (
 
 	Authorization interface {
 		Login(userId int64, token string) error
-		GetIdByEmail(email string, hashedPassword string) (int64, error)
+		GetIDByEmail(email string, hashedPassword string) (int64, error)
+		DeleteRefreshToken(id int64, token string) error
 	}
 )

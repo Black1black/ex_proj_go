@@ -26,8 +26,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		auth.POST("/registration")
 		auth.PATCH("/replace_password")
 		auth.POST("/login", h.login)
-		auth.POST("/refresh", h.getUserRefreshToken, h.getUserId, h.refresh)
-		auth.DELETE("/logout")
+		auth.POST("/refresh", h.getUserRefreshToken, h.getUserId, h.getUserModel, h.refresh)
+		auth.DELETE("/logout", h.getUserRefreshToken, h.logout)
 
 	}
 

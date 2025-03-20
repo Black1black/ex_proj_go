@@ -15,22 +15,13 @@ type loginRequest struct {
 
 func (h *Handler) login(c *gin.Context) {
 
-	// rawUserModel, ok := c.Get(userModelCtx) // c.Get возвращает any
-	// if !ok {
-	// 	return
-	// }
-	// userModel, ok := rawUserModel.(*entity.User)
-	// if !ok {
-	// 	return
-	// }
-
 	var request loginRequest
 
 	if err := c.BindJSON(&request); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 	}
 
-	id, err := h.authUC.GetIdByEmail(request.Login, authTools.GeneratePasswordHash(request.Password))
+	id, err := h.authUC.GetIDByEmail(request.Login, authTools.GeneratePasswordHash(request.Password))
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -66,6 +57,20 @@ func (h *Handler) refresh(c *gin.Context) {
 	if !ok {
 		return
 	}
+	rawToken, ok := c.Get(tokenCtx)
+	if !ok {
+		return
+	}
+	token, ok := rawToken.(string)
+	if !ok {
+		return
+	}
+
+	err := h.authUC.DeleteRefreshToken(userModel.ID, token)
+	if err != nil {
+		return
+	}
+
 	refreshToken, err := authTools.GenerateToken(userModel.ID, "refresh")
 	if err != nil {
 		return
@@ -87,6 +92,35 @@ func (h *Handler) refresh(c *gin.Context) {
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	})
+}
+
+func (h *Handler) logout(c *gin.Context) {
+
+	rawToken, ok := c.Get(tokenCtx)
+	if !ok {
+		return
+	}
+	token, ok := rawToken.(string)
+	if !ok {
+		return
+	}
+
+	rawUserModel, ok := c.Get(userModelCtx) // c.Get возвращает any
+	if !ok {
+		return
+	}
+	userModel, ok := rawUserModel.(*entity.User)
+	if !ok {
+		return
+	}
+
+	err := h.authUC.DeleteRefreshToken(userModel.ID, token)
+	if err != nil {
+		return
+	}
+	c.SetCookie(authorizationCookie, "", -1, "", "", false, true)
+	c.SetCookie(authorizationRefreshCookie, "", -1, "", "", false, true)
+
 }
 
 // type signInInput struct {
