@@ -23,8 +23,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/registration")
-		auth.PATCH("/replace_password")
+		auth.POST("/registration", h.registrationUser)
+		auth.PATCH("/replace_password", h.getUserToken, h.getUserId, h.getUserModel, h.replacePassword)
 		auth.POST("/login", h.login)
 		auth.POST("/refresh", h.getUserRefreshToken, h.getUserId, h.getUserModel, h.refresh)
 		auth.DELETE("/logout", h.getUserRefreshToken, h.logout)

@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type User struct {
+type Users struct {
 	ID             int64     `gorm:"primaryKey;autoIncrement;type:bigint;not null"`
 	Phone          *int      `gorm:"unique"`
 	Email          *string   `gorm:"unique"`
@@ -20,19 +20,19 @@ type User struct {
 	Text           *string
 }
 
-func (User) TableName() string {
+func (Users) TableName() string {
 	return "users"
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+func (u *Users) BeforeCreate(tx *gorm.DB) (err error) {
 	return u.validate()
 }
 
-func (u *User) BeforeUpdate(tx *gorm.DB) (err error) {
+func (u *Users) BeforeUpdate(tx *gorm.DB) (err error) {
 	return u.validate()
 }
 
-func (u *User) validate() error {
+func (u *Users) validate() error {
 	if u.Phone == nil && u.Email == nil {
 		return errors.New("Either phone or email must be provided")
 	}
@@ -50,7 +50,7 @@ func (u *User) validate() error {
 
 type UsersLocation struct {
 	UserID   int64       `gorm:"column:user_id;primaryKey;type:bigint;not null"`
-	User     User        `gorm:"foreignKey:UserID;references:ID"`
+	Users    Users       `gorm:"foreignKey:UserID;references:ID"`
 	Location georm.Point `gorm:"type:geometry(POINT,4326)"`
 }
 

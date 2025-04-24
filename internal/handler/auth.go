@@ -8,9 +8,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type registrationRequest struct {
+	loginRequest
+	Name string `json:"name" binding:"required"`
+}
+
+func (h *Handler) registrationUser(c *gin.Context) {
+	var request registrationRequest
+	if err := c.BindJSON(&request); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+	}
+	err := h.authUC.RegistrationUser(request.Name, request.Email, authTools.GeneratePasswordHash(request.Password))
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]string{
+		"message": "Registration successfully",
+	})
+
+}
+
 type loginRequest struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
 }
 
 func (h *Handler) login(c *gin.Context) {
@@ -21,7 +43,7 @@ func (h *Handler) login(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 	}
 
-	id, err := h.authUC.GetIDByEmail(request.Login, authTools.GeneratePasswordHash(request.Password))
+	id, err := h.authUC.GetIDByEmail(request.Email, authTools.GeneratePasswordHash(request.Password))
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -120,6 +142,41 @@ func (h *Handler) logout(c *gin.Context) {
 	}
 	c.SetCookie(authorizationCookie, "", -1, "", "", false, true)
 	c.SetCookie(authorizationRefreshCookie, "", -1, "", "", false, true)
+
+}
+
+type replacePasswordRequest struct {
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required"`
+}
+
+func (h *Handler) replacePassword(c *gin.Context) {
+
+	rawUserModel, ok := c.Get(userModelCtx) // c.Get возвращает any
+	if !ok {
+		return
+	}
+	userModel, ok := rawUserModel.(*entity.User)
+	if !ok {
+		return
+	}
+
+	var request replacePasswordRequest
+	if err := c.BindJSON(&request); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	err := h.authUC.ReplaceOldPassword(userModel.ID,
+		authTools.GeneratePasswordHash(request.OldPassword),
+		authTools.GeneratePasswordHash(request.NewPassword))
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]string{
+		"message": "Password replaced successfully",
+	})
 
 }
 
