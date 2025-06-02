@@ -4,3 +4,7 @@ postgres:
   user: "postgres"
   password: "password"
   dbname: "mydb"
+redis:
+  host: "dff"
+  port: 1111
+  password: "dgdfgd"

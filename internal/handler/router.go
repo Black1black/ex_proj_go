@@ -34,7 +34,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	users := router.Group("/users")
 	{
 
-		users.GET("/user")
+		users.GET("/user", h.getUserToken, h.getUserId, h.myInfo)
 		users.GET("/user:id")
 		users.PATCH("/users")
 		users.PATCH("/location")
